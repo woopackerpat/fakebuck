@@ -10,5 +10,42 @@ module.exports = (sequelize, DataTypes) => {
       underscored: true,
     }
   );
+  Post.associate = (models) => {
+    Post.belongsTo(models.User, {
+      foreignKey: {
+        allowNull: false,
+        name: "userId",
+     
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
+
+    Post.hasMany(models.Comment, {
+        foreignKey: {
+          allowNull: false,
+          name: "postId",
+       
+        },
+        onUpdate: "RESTRICT",
+        onDelete: "RESTRICT",
+      });
+
+      Post.hasMany(models.Like, {
+        foreignKey: {
+          allowNull: false,
+          name: "postId",
+       
+        },
+        onUpdate: "RESTRICT",
+        onDelete: "RESTRICT",
+      });
+  };
+
+  
+
+  
+
+  
   return Post;
 };
