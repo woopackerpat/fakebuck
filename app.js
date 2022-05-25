@@ -8,6 +8,7 @@ const authRouter = require("./routes/authRoute");
 const userRouter = require("./routes/userRoute");
 const friendRouter = require("./routes/friendRoute");
 const postRouter = require("./routes/postRoute");
+
 const authenticate = require("./middlewares/authenticate");
 const notFoundMiddleware = require("./middlewares/notFound");
 const errorMiddleware = require("./middlewares/error");
