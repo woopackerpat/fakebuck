@@ -171,20 +171,38 @@ exports.getUserPost = async (req, res, next) => {
     const userId = await FriendService.findFriendId(req.user.id);
     userId.push(req.user.id);
     const post = await Post.findAll({
+      attributes: {
+        exclude: ["createdAt", "userId"],
+      },
       where: { userId },
       include: [
         {
           model: User,
           attributes: {
-            exclude: ["password"],
+            exclude: [
+              "password",
+              "email",
+              "phoneNumber",
+              "coverPhoto",
+              "createdAt",
+            ],
           },
         },
         {
           model: Comment,
+          attributes: {
+            exclude: ["createdAt", "userId"],
+          },
           include: {
             model: User,
             attributes: {
-              exclude: ["password"],
+              exclude: [
+                "password",
+                "email",
+                "phoneNumber",
+                "coverPhoto",
+                "createdAt",
+              ],
             },
           },
         },
