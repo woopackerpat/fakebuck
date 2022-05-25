@@ -4,7 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       title: DataTypes.STRING,
       image: DataTypes.STRING,
-      like: DataTypes.INTEGER.UNSIGNED,
+      like: { type: DataTypes.INTEGER.UNSIGNED, defaltValue: 0 },
     },
     {
       underscored: true,
@@ -15,37 +15,29 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: {
         allowNull: false,
         name: "userId",
-     
       },
       onUpdate: "RESTRICT",
       onDelete: "RESTRICT",
     });
 
     Post.hasMany(models.Comment, {
-        foreignKey: {
-          allowNull: false,
-          name: "postId",
-       
-        },
-        onUpdate: "RESTRICT",
-        onDelete: "RESTRICT",
-      });
+      foreignKey: {
+        allowNull: false,
+        name: "postId",
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
 
-      Post.hasMany(models.Like, {
-        foreignKey: {
-          allowNull: false,
-          name: "postId",
-       
-        },
-        onUpdate: "RESTRICT",
-        onDelete: "RESTRICT",
-      });
+    Post.hasMany(models.Like, {
+      foreignKey: {
+        allowNull: false,
+        name: "postId",
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
   };
 
-  
-
-  
-
-  
   return Post;
 };
