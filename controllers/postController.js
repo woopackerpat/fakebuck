@@ -1,7 +1,8 @@
 const createError = require("../utils/createError");
 const cloudinary = require("../utils/cloudinary");
 const fs = require("fs");
-const { Post, Like, sequelize, Comment } = require("../models");
+const { Post, Like, sequelize, Comment, User } = require("../models");
+const FriendService = require("../services/friendService");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -126,7 +127,7 @@ exports.deletePost = async (req, res, next) => {
 
 exports.updatePost = async (req, res, next) => {
   try {
-    const {id} = req.params;
+    const { id } = req.params;
     const { title } = req.body;
     if (!title && !req.file) {
       createError("title or image is required", 400);
@@ -161,5 +162,36 @@ exports.updatePost = async (req, res, next) => {
     if (req.file) {
       fs.unlinkSync(req.file.path);
     }
+  }
+};
+
+exports.getUserPost = async (req, res, next) => {
+  try {
+    //   SELECT * FROM posts WHERE user_id IN (myId, ...friendId) ถ้้า userId เป็ฯ array จะเปลี่ยนเป็ฯ IN ให้อัตนโนมัติ
+    const userId = await FriendService.findFriendId(req.user.id);
+    userId.push(req.user.id);
+    const post = await Post.findAll({
+      where: { userId },
+      include: [
+        {
+          model: User,
+          attributes: {
+            exclude: ["password"],
+          },
+        },
+        {
+          model: Comment,
+          include: {
+            model: User,
+            attributes: {
+              exclude: ["password"],
+            },
+          },
+        },
+      ],
+    });
+    res.json({ post });
+  } catch (err) {
+    next(err);
   }
 };
