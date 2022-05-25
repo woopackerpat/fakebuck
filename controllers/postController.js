@@ -123,3 +123,43 @@ exports.deletePost = async (req, res, next) => {
     next(err);
   }
 };
+
+exports.updatePost = async (req, res, next) => {
+  try {
+    const {id} = req.params;
+    const { title } = req.body;
+    if (!title && !req.file) {
+      createError("title or image is required", 400);
+    }
+
+    const post = await Post.findOne({ where: { id } });
+    if (!post) {
+      createError("post not found", 400);
+    }
+
+    if (post.userId !== req.user.id) {
+      createError("you have no permission", 403);
+    }
+
+    if (req.file) {
+      if (post.image) {
+        const splited = post.image.split("/");
+        const publicId = splited[splited.length - 1].split(".")[0];
+        await cloudinary.destroy(publicId);
+      }
+      const result = await cloudinary.upload(req.file.path);
+      post.image = result.secure_url;
+    }
+    if (title) {
+      post.title = title;
+    }
+    await post.save();
+    res.json({ post });
+  } catch (err) {
+    next(err);
+  } finally {
+    if (req.file) {
+      fs.unlinkSync(req.file.path);
+    }
+  }
+};
