@@ -169,12 +169,14 @@ exports.getUserPost = async (req, res, next) => {
   try {
     //   SELECT * FROM posts WHERE user_id IN (myId, ...friendId) ถ้้า userId เป็ฯ array จะเปลี่ยนเป็ฯ IN ให้อัตนโนมัติ
     const userId = await FriendService.findFriendId(req.user.id);
+    console.log(userId)
     userId.push(req.user.id);
-    const post = await Post.findAll({
+    const posts = await Post.findAll({
       attributes: {
         exclude: ["createdAt", "userId"],
       },
       where: { userId },
+      order: [["updatedAt", "DESC"]],
       include: [
         {
           model: User,
@@ -206,9 +208,27 @@ exports.getUserPost = async (req, res, next) => {
             },
           },
         },
+        {
+          model: Like,
+          attributes: {
+            exclude: ["createdAt"],
+          },
+          include: {
+            model: User,
+            attributes: {
+              exclude: [
+                "password",
+                "email",
+                "phoneNumber",
+                "coverPhoto",
+                "createdAt",
+              ],
+            },
+          },
+        },
       ],
     });
-    res.json({ post });
+    res.json({ posts });
   } catch (err) {
     next(err);
   }

@@ -12,7 +12,12 @@ router.patch(
     { name: "coverPhoto", maxCount: 1 },
   ]),
   userController.updateProfile
-);
-router.get("/posts", postController.getUserPost);
+  );
+  router.get("/posts", postController.getUserPost);
+  // ต้องเอาไว้ข้างล่าง ไม่งั้นจะเข้าใจว่า posts เป็น userId
+  router.get('/:userId', userController.getUserById)
 
 module.exports = router;
+
+
+
