@@ -10,14 +10,15 @@ exports.createPost = async (req, res, next) => {
     if (!title && !req.file) {
       createError("title or image is required", 400);
     }
-    let image;
-    if (req.file) {
-      const result = await cloudinary.upload(req.file.path);
-      image = result.secure_url;
-    }
+    console.log(req.file)
+    // let image;
+    // if (req.file) {
+    //   const result = await cloudinary.upload(req.file.path);
+    //   image = result.secure_url;
+    // }
 
-    const post = await Post.create({ title, image, userId: req.user.id });
-    res.json({ post });
+    // const post = await Post.create({ title, image, userId: req.user.id });
+    // res.json({ post });
   } catch (err) {
     next(err);
   } finally {

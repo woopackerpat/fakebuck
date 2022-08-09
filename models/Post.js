@@ -3,7 +3,7 @@ module.exports = (sequelize, DataTypes) => {
     "Post",
     {
       title: DataTypes.STRING,
-      image: DataTypes.STRING,
+
       like: { type: DataTypes.INTEGER.UNSIGNED, defaltValue: 0 },
     },
     {
@@ -15,6 +15,15 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: {
         allowNull: false,
         name: "userId",
+      },
+      onUpdate: "RESTRICT",
+      onDelete: "RESTRICT",
+    });
+
+    Post.hasMany(models.Image, {
+      foreignKey: {
+        allowNull: false,
+        name: "postId",
       },
       onUpdate: "RESTRICT",
       onDelete: "RESTRICT",
