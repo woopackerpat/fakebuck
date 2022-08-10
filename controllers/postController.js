@@ -7,24 +7,36 @@ const FriendService = require("../services/friendService");
 exports.createPost = async (req, res, next) => {
   try {
     const { title } = req.body;
-    if (!title && !req.file) {
+    if (!title && !req.files) {
       createError("title or image is required", 400);
     }
-    console.log(req.file)
-    // let image;
-    // if (req.file) {
-    //   const result = await cloudinary.upload(req.file.path);
-    //   image = result.secure_url;
-    // }
 
-    // const post = await Post.create({ title, image, userId: req.user.id });
+    if (req.files) {
+      const files = req.files;
+      const post = await Post.create({ title, userId: req.user.id });
+
+      const results = await Promise.all(
+        files.map(async (el) => {
+          const result = await cloudinary.upload(el.path);
+          
+          return {image:result.secure_url, postId: post.id};
+        })
+      );
+
+      console.log(results)
+
+      // const result = await cloudinary.upload(req.files.path);
+      // image = result.secure_url;
+    }
+
+    // const imagesUrl = await Image.bulkCreate()
     // res.json({ post });
   } catch (err) {
     next(err);
   } finally {
-    if (req.file) {
-      fs.unlinkSync(req.file.path);
-    }
+    // if (req.file) {
+    //   fs.unlinkSync(req.file.path);
+    // }
   }
 };
 
@@ -170,7 +182,7 @@ exports.getUserPost = async (req, res, next) => {
   try {
     //   SELECT * FROM posts WHERE user_id IN (myId, ...friendId) ถ้้า userId เป็ฯ array จะเปลี่ยนเป็ฯ IN ให้อัตนโนมัติ
     const userId = await FriendService.findFriendId(req.user.id);
-    console.log(userId)
+    console.log(userId);
     userId.push(req.user.id);
     const posts = await Post.findAll({
       attributes: {
