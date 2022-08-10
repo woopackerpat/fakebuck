@@ -1,7 +1,7 @@
 const createError = require("../utils/createError");
 const cloudinary = require("../utils/cloudinary");
 const fs = require("fs");
-const { Post, Like, sequelize, Comment, User } = require("../models");
+const { Post, Like, sequelize, Comment, User, Image } = require("../models");
 const FriendService = require("../services/friendService");
 
 exports.createPost = async (req, res, next) => {
@@ -17,13 +17,20 @@ exports.createPost = async (req, res, next) => {
 
       const results = await Promise.all(
         files.map(async (el) => {
-          const result = await cloudinary.upload(el.path);
-          
-          return {image:result.secure_url, postId: post.id};
+          try {
+            const result = await cloudinary.upload(el.path);
+            return { image: result.secure_url, postId: post.id };
+          } catch {
+            next(err);
+          } finally {
+            fs.unlinkSync(el.path);
+          }
         })
       );
 
-      console.log(results)
+      const imageUrls = await Image.bulkCreate(results);
+
+     
 
       // const result = await cloudinary.upload(req.files.path);
       // image = result.secure_url;
