@@ -30,6 +30,7 @@ exports.createPost = async (req, res, next) => {
 
       const imageUrls = await Image.bulkCreate(results);
 
+      res.status(200).send({post, images: JSON.parse(JSON.stringify(imageUrls))})
      
 
       // const result = await cloudinary.upload(req.files.path);
