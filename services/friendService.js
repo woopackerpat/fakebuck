@@ -1,4 +1,4 @@
-const { Friend, User } = require("../models");
+const { Friend, User, Post } = require("../models");
 const { FRIEND_ACCEPTED, FRIEND_PENDING } = require("../config/constants");
 const { Op } = require("sequelize");
 
@@ -18,25 +18,25 @@ exports.findFriendId = async (id) => {
 
 exports.findAcceptedFriend = async (id) => {
   // WHERE (requestToId = 1 Or requestFromId = 1) AND status = 'ACCEPTED
- 
+
   const friends = await Friend.findAll({
     where: {
       [Op.or]: [{ requestToId: id }, { requestFromId: id }],
       status: FRIEND_ACCEPTED,
     },
   });
-  console.log(friends)
+  console.log(friends);
 
   const friendIds = friends.map((el) =>
     el.requestToId === id ? el.requestFromId : el.requestToId
   );
-  
+
   // sequelize จะรู้โดยอัตนโนมัติหากเป็น array และจเใช้คำสั่ง WHERE id in (2, 4, 5)
   const users = await User.findAll({
     where: { id: friendIds },
     attributes: { exclude: ["password"] },
   });
-  
+
   return users;
 };
 
@@ -99,3 +99,6 @@ exports.findUnknown = async (id) => {
 
   return users;
 };
+
+
+

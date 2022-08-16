@@ -3,6 +3,7 @@ const cloudinary = require("../utils/cloudinary");
 const fs = require("fs");
 const { Post, Like, sequelize, Comment, User, Image } = require("../models");
 const FriendService = require("../services/friendService");
+const res = require("express/lib/response");
 
 exports.createPost = async (req, res, next) => {
   try {
@@ -30,8 +31,9 @@ exports.createPost = async (req, res, next) => {
 
       const imageUrls = await Image.bulkCreate(results);
 
-      res.status(200).send({post, images: JSON.parse(JSON.stringify(imageUrls))})
-     
+      res
+        .status(200)
+        .send({ post, images: JSON.parse(JSON.stringify(imageUrls)) });
 
       // const result = await cloudinary.upload(req.files.path);
       // image = result.secure_url;
@@ -250,6 +252,20 @@ exports.getUserPost = async (req, res, next) => {
       ],
     });
     res.json({ posts });
+  } catch (err) {
+    next(err);
+  }
+};
+
+exports.getAllPosts = async (req, res, next) => {
+  try {
+    const posts = JSON.parse(JSON.stringify(await Post.findAll({
+      include: [
+        Image
+      ],
+      order: [["createdAt", "DESC"]]
+    })));
+    res.status(200).json({ posts });
   } catch (err) {
     next(err);
   }

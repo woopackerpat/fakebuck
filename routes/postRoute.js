@@ -4,6 +4,7 @@ const postController = require("../controllers/postController");
 const commentController = require("../controllers/commentController");
 const upload = require("../middlewares/upload");
 
+router.get('/allposts', postController.getAllPosts)
 router.post("/", upload.array("image"), postController.createPost);
 router.patch("/:id", upload.single("image"), postController.updatePost);
 router.delete("/:id", postController.deletePost);

@@ -13,11 +13,13 @@ const genToken = payload =>
 exports.login = async (req, res, next) => {
   try {
     const { emailOrPhone, password } = req.body;
+    
     const user = await User.findOne({
       where: {
         [Op.or]: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }]
       }
     });
+    
 
     if (!user) {
       createError('invalid credential', 400);
