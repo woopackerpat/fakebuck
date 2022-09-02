@@ -14,6 +14,7 @@ exports.createPost = async (req, res, next) => {
 
     if (req.files) {
       const files = req.files;
+      
       const post = await Post.create({ title, userId: req.user.id });
 
       const results = await Promise.all(

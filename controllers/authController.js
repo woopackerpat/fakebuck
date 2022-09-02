@@ -1,38 +1,47 @@
 const createError = require("../utils/createError");
-const validator = require('validator')
-const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
-const {User} = require('../models')
-const { Op } = require('sequelize');
+const validator = require("validator");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { User } = require("../models");
+const { Op } = require("sequelize");
 
-const genToken = payload =>
+const genToken = (payload) =>
   jwt.sign(payload, process.env.JWT_SECRET_KEY, {
-    expiresIn: process.env.JWT_EXPIRES_IN
+    expiresIn: process.env.JWT_EXPIRES_IN,
   });
 
 exports.login = async (req, res, next) => {
   try {
     const { emailOrPhone, password } = req.body;
-    
+
     const user = await User.findOne({
       where: {
-        [Op.or]: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }]
-      }
+        [Op.or]: [{ email: emailOrPhone }, { phoneNumber: emailOrPhone }],
+      },
     });
-    
 
     if (!user) {
-      createError('invalid credential', 400);
+      createError("invalid credential", 400);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      createError('invalid credential', 400);
+      createError("invalid credential", 400);
     }
 
     const token = genToken({ id: user.id });
-    res.json({ token });
+    // res
+    //   .cookie("test", token, {
+    //     maxAge: 9000000,
+    //     httpOnly: true,
+    //     domain: "localhost:3000"
+
+    //   })
+    // res.cookie("test",token, {maxAge: 900000}).json({token})
+    res
+      .set({ "Set-Cookie": token, Authorization: "Bearer " + token })
+      .json({ token });
   } catch (err) {
     next(err);
   }
@@ -45,34 +54,31 @@ exports.signup = async (req, res, next) => {
     if (!emailOrPhone) {
       createError("email or phone number is required", 400);
     }
-    if(!password) {
-        createError("password is required", 400)
+    if (!password) {
+      createError("password is required", 400);
     }
 
-    if(password !== confirmPassword) {
-        createError('password and confirm password did not match', 400)
+    if (password !== confirmPassword) {
+      createError("password and confirm password did not match", 400);
     }
 
-    const isMobilePhone = validator.isMobilePhone(emailOrPhone+ '')
-    const isEmail = validator.isEmail(emailOrPhone+ '');
+    const isMobilePhone = validator.isMobilePhone(emailOrPhone + "");
+    const isEmail = validator.isEmail(emailOrPhone + "");
     if (!isMobilePhone && !isEmail) {
-        createError('email or phone number is invalid format', 400)
-    } 
+      createError("email or phone number is invalid format", 400);
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 12)
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = await User.create({
-        firstName,
-        lastName,
-        email: isEmail? emailOrPhone: null,
-        phoneNumber: isMobilePhone ? emailOrPhone : null,
-        password: hashedPassword
-    })
-
-
+      firstName,
+      lastName,
+      email: isEmail ? emailOrPhone : null,
+      phoneNumber: isMobilePhone ? emailOrPhone : null,
+      password: hashedPassword,
+    });
 
     const token = genToken({ id: user.id });
-    res.status(201).json({token})
-
+    res.status(201).json({ token });
   } catch (err) {
     next(err);
   }

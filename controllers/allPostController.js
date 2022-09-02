@@ -2,7 +2,7 @@ const { Post,  Image } = require("../models");
 
 exports.getAllPosts = async (req, res, next) => {
   try {
-    
+    console.log(req.headers)
     const posts = JSON.parse(
       JSON.stringify(
         await Post.findAll({
